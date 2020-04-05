@@ -1,0 +1,41 @@
+---
+- name: Update all packages to the latest version
+  apt:
+    upgrade: yes
+
+- name: Install required packages with cache update and system upgrade
+  apt: name={{ item }} state=latest update_cache=yes
+  loop: [ 'nginx', 'php', 'php-fpm', 'mariadb-server', 'php-mysql', 'python3-pymysql']
+  tags:
+    - packages
+
+- name: Make sure pymysql is present
+  pip:
+    name: pymysql
+    state: present
+
+- name: start mariadb
+  service:
+    name: mariadb
+    enabled: true
+    state: started
+
+- name: delete anonymous MySQL server user for localhost
+  mysql_user:
+    user: ""
+    host: localhost
+    state: absent
+  tags:
+    - db
+    
+- name: update mysql root password for all root accounts
+  mysql_user:
+    name: root
+    host: localhost
+    password: "{{ mysql_root_password }}"
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    check_implicit_admin: yes
+    priv: "*.*:ALL,GRANT"
+  tags:
+    - db

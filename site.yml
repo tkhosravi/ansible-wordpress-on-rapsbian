@@ -1,0 +1,11 @@
+---
+# This playbook deploys a standalone Mule 3.9 CE server.
+
+- hosts: raspberry
+  remote_user: pi
+  gather_facts: true
+  become: True
+  become_method: sudo
+
+  roles:
+    - role: docker
